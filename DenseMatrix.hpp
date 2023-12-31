@@ -4,6 +4,10 @@
 #include <cassert>
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <string>
+
+
 using namespace std;
 
 class DenseMatrix{
@@ -206,6 +210,44 @@ void LUFactorize(DenseMatrix& M, vector<int>& P){
 
     }
 
+}
+
+DenseMatrix LoadDenseMatrix(const string& filename){
+    /* Load from a file a DenseMatrix. */
+    ifstream file(filename);
+    assert(file.is_open() == 1);
+
+    string str;
+    // Line 1: #SIZE.
+    file >> str;
+    assert("#SIZE" == str);
+
+    // Line 2 & 3: nr and nc.
+    int nr, nc;
+    file >> nr;
+    file >> nc;
+    cout << "nr = " << nr << endl;
+    cout << "nc = " << nc << endl;
+
+    DenseMatrix res(nr, nc);
+
+    // Line 4: #DATA.
+    file >> str;
+    assert("#DATA" == str);
+
+    // Next lines: Matrix coefficients.
+    int i = 0, j = 0;
+    while(file){
+        file >> res(i, j);
+
+        j++;
+        if (j == nc){
+            j = 0;
+            i++;
+        }
+    }
+
+    return res;
 }
 
 

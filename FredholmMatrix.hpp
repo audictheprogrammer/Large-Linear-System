@@ -10,6 +10,8 @@ using namespace std;
 #include <cassert>
 #include <fstream>
 #define MAX_R 15
+#define MAX_R_2 100
+
 
 class FredholmMatrix{
     public:
@@ -131,7 +133,7 @@ FredholmMatrix CrossApproximation(const DenseMatrix& B, const int& r){
     DenseMatrix R = B;
     FredholmMatrix Bt(B.nr); // Representing B_tilda
 
-    int j0, k0 = 0;
+    int j0 = 0, k0 = 0;
     double mx = std::abs(R(j0, k0));
     for (int p = 0; p < r; p++){
         // Set j0, k0 to argmax.
@@ -146,7 +148,6 @@ FredholmMatrix CrossApproximation(const DenseMatrix& B, const int& r){
                 }
             }
         }
-
 
         // Get up and vp.
         vector<double> up = R.col(k0) / R(j0, k0);
@@ -234,6 +235,37 @@ void PlotGraph(const size_t& n){
 
     Write("Graph1.txt", X, Y);
 
+}
+
+void PlotGraph(const string& filename){
+    /* Plot the function log(r) -> log(FrobNorm(B - Br)).
+    B loaded from filename.
+    */
+    
+    // The X_axis and Y_axis for plotting.
+    vector<double> X(MAX_R_2);
+    vector<double> Y(MAX_R_2);
+
+    // Loading B.
+    DenseMatrix B = LoadDenseMatrix(filename);
+
+    // Constructing Br.
+    for (int r = 1; r <= MAX_R_2; r++){
+        cout << "r = " << r << endl;
+        FredholmMatrix Br = CrossApproximation(B, r);
+
+        // Computing the norm of B-Br.
+        DenseMatrix Diff(B.nr, B.nc);
+        for (int i = 0; i < B.nr; i++){
+            for (int j = 0; j < B.nc; j++){
+                Diff(i, j) = B(i, j) - Br(i, j);
+            }
+        }
+        X[r-1] = r;
+        Y[r-1] = FrobeniusNorm(Diff);
+    }
+
+    Write("Graph2.txt", X, Y);
 }
 
 #endif
