@@ -4,7 +4,7 @@ import sys
 
 input = "Graph1.txt"
 output = "Graph1.png"
-title = "Error analysis with MAX_R = 15 and Mat_N = 300 (log_2 Scale)"
+title = "Error analysis with Mat_N = 10 (log_2 Scale)"
 
 """ Examples.
 Default: Graph 1.
@@ -17,14 +17,16 @@ if len(sys.argv) == 2:
     if sys.argv[1] == "2":
         input = "Graph2.txt"
         output = "Graph2.png"
-        title = "Error analysis with MAX_R = 300 and Mat_N = 300 (log_2 Scale)"
-        print("Plotting the Graph 2.")
+        title = "Error analysis with Mat_N = 300 (log_2 Scale)"
+        print("User's choice: Graph 2.")
     else:
-        print("Plotting the Graph 1.")
+        print("User's choice: Graph 1.")
 else:
-    print("Plotting the Graph 1.")
+    print("User's choice: Graph 1.")
 
 
+print()
+print("Reading from:", input);
 with open(input, "r") as f:
     X = []
     Y = []
@@ -38,8 +40,9 @@ with open(input, "r") as f:
         X.append(x)
         Y.append(y)
 
-print("X = ", X)
-print("Y = ", Y)
+# print("X = ", X)
+# print("Y = ", Y)
+
 
 plt.plot(X, Y, label="log(r) -> log_2 || B-Br ||")
 plt.title(title)
@@ -48,3 +51,4 @@ plt.ylabel("log_2 || B-Br ||")
 plt.legend()
 plt.savefig(output)
 plt.clf()
+print("Graph plotted at:", output)

@@ -13,8 +13,6 @@ using namespace std;
 
 #define EPS 1.0E-10
 #define NB_ITER 100
-#define MAX_R 15
-#define MAX_R_2 100
 
 
 class FredholmMatrix{
@@ -214,8 +212,8 @@ void PlotGraph(const size_t& n){
     */
 
     // The X_axis and Y_axis for plotting.
-    vector<double> X(MAX_R);
-    vector<double> Y(MAX_R);
+    vector<double> X(n);
+    vector<double> Y(n);
 
     // Constructing B.
     DenseMatrix B(n, n);
@@ -228,7 +226,7 @@ void PlotGraph(const size_t& n){
     }
 
     // Constructing Br.
-    for (int r = 1; r <= MAX_R; r++){
+    for (size_t r = 1; r <= n; r++){
         cout << "r = " << r << endl;
         FredholmMatrix Br = CrossApproximation(B, r);
 
@@ -252,15 +250,16 @@ void PlotGraph(const string& filename){
     B loaded from filename.
     */
     
-    // The X_axis and Y_axis for plotting.
-    vector<double> X(MAX_R_2);
-    vector<double> Y(MAX_R_2);
 
     // Loading B.
     DenseMatrix B = LoadDenseMatrix(filename);
 
+    // The X_axis and Y_axis for plotting.
+    vector<double> X(B.nr);
+    vector<double> Y(B.nr);
+
     // Constructing Br.
-    for (int r = 1; r <= MAX_R_2; r++){
+    for (int r = 1; r <= B.nr; r++){
         cout << "r = " << r << endl;
         FredholmMatrix Br = CrossApproximation(B, r);
 
