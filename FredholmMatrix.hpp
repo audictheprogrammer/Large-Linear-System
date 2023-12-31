@@ -9,6 +9,10 @@ using namespace std;
 #include "VectorArithmetics.hpp"
 #include <cassert>
 #include <fstream>
+
+
+#define EPS 1.0E-10
+#define NB_ITER 100
 #define MAX_R 15
 #define MAX_R_2 100
 
@@ -91,14 +95,14 @@ ostream& operator<<(ostream& o, FredholmMatrix& M){
         for (int j = 0; j < M.n; j++){
             double v = M(i, j);
             o << v;
-            if (j == M.n-1){
-                o << endl;
-            } else {
+            if (j != M.n-1){
                 o << "\t";
+            } else if (i != M.n - 1){
+                o << endl;
             }
         }
     }
-    o << "]" << endl;
+    o << "]"<< endl;
 
     return o;
 }
@@ -115,13 +119,19 @@ vector<double> MinResSolve(FredholmMatrix& A, vector<double>& b){
     vector<double> x(A.n, 0.);
 
     int nb = 0;
-    while (nb < 10){
+    while (nb < NB_ITER){
         r = b - A*x;
         vector<double> tmp = A*r;
         a = scalarProduct(r, tmp) / (Norm2(tmp) * Norm2(tmp));
         x = x + a*r;
+        nb++;
+        if (Norm2(a*r) < EPS){
+            cout << "MinResSolve completed with nb iter: " << nb << endl;
+            return x;
+        }
     }
 
+    cout << "MinResSolve completed with nb iter: " << nb << endl;
     return x;
 }
 

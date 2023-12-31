@@ -72,7 +72,19 @@ vector<double> operator/(const vector<double>& u, const double& l){
     return res;
 }
 
-
+ostream& operator<<(ostream& o, const vector<double>& u){
+    /* Stream operator. */
+    o << "[";
+    for (size_t i = 0; i < u.size(); i++){
+        o << u[i];
+        if (i != u.size() - 1){
+            o << "\t";
+        }
+    }
+    o << "]" << endl;
+    
+    return o;
+}
 
 
 // FUNCTIONS.
