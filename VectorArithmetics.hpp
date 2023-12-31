@@ -62,6 +62,16 @@ vector<double> operator*(const double& l, const vector<double>& u){
     return res;
 }
 
+vector<double> operator/(const vector<double>& u, const double& l){
+    /* Division operator between a vector and a scalar. */
+    vector<double> res(u.size(), 0.);
+    for (size_t i = 0; i < u.size(); i++){
+        res[i] = u[i] / l;
+    }
+
+    return res;
+}
+
 
 
 

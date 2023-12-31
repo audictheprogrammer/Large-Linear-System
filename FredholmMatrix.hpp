@@ -8,6 +8,8 @@ using namespace std;
 #include "MapMatrix.hpp"
 #include "VectorArithmetics.hpp"
 #include <cassert>
+#include <fstream>
+#define MAX_R 15
 
 class FredholmMatrix{
     public:
@@ -78,7 +80,6 @@ class FredholmMatrix{
         this->lrv.push_back(v);
     }
 
-    friend vector<double> MinResSolve(const FredholmMatrix& A, const vector<double> b);
 };
 
 ostream& operator<<(ostream& o, FredholmMatrix& M){
@@ -101,7 +102,7 @@ ostream& operator<<(ostream& o, FredholmMatrix& M){
 }
 
 vector<double> MinResSolve(FredholmMatrix& A, vector<double>& b){
-    /* Solve the linear system Ax = b using the minimal residual method.
+    /* Solves the linear system Ax = b using the minimal residual method.
     r = b - Ax
     a = r^T A r / Norm(Ar, 2)^2
     x = x + ar
@@ -122,7 +123,118 @@ vector<double> MinResSolve(FredholmMatrix& A, vector<double>& b){
     return x;
 }
 
+FredholmMatrix CrossApproximation(const DenseMatrix& B, const int& r){
+    /* Computes a low-rank approximation of B. 
+    */
+    assert(B.nc == B.nr);
 
+    DenseMatrix R = B;
+    FredholmMatrix Bt(B.nr); // Representing B_tilda
+
+    int j0, k0 = 0;
+    double mx = std::abs(R(j0, k0));
+    for (int p = 0; p < r; p++){
+        // Set j0, k0 to argmax.
+        for (int j = 0; j < R.nr; j++){
+            for (int k = 0; k < R.nc; k++){
+                double l = std::abs(R(j, k));
+                // cout << "L = " << l << endl;
+                if (mx < l){
+                    mx = l;
+                    j0 = j;
+                    k0 = k;
+                }
+            }
+        }
+
+
+        // Get up and vp.
+        vector<double> up = R.col(k0) / R(j0, k0);
+        vector<double> vp = R.row(j0);
+
+        // Move u_p and v_p from R to Bt.
+        for (int i = 0; i < R.nr; i++){
+            for (int j = 0; j < R.nc; j++){
+                R(i, j) -= up[i] * vp[j]; // up[i] or vp[i]
+            }
+        }
+
+        Bt.insert(up, vp);
+
+        mx = 0;
+    }
+
+
+    return Bt;
+}
+
+
+double FrobeniusNorm(const DenseMatrix& M){
+    /* Computes the Frobenius norm of a DenseMatrix. */
+    double res = 0.;
+
+    for (int i = 0; i < M.nr; i++){
+        for (int j = 0; j < M.nc; j++){
+            res += M(i, j) * M(i, j);
+        }
+    }
+    return std::sqrt(res);
+}
+
+void Write(const string& filename, const vector<double>& X, const vector<double>& Y){
+    /* Writes data into a file. */
+    ofstream f;
+    f.open(filename);
+
+    if (!f.is_open()){
+        cout << "Error f.open: NOT OPEN !" << endl;
+    }
+        for (size_t i = 0; i < X.size(); i++){
+            f << X[i] << " " << Y[i] << endl;
+            cout << X[i] << " " << Y[i] << endl;
+        }
+
+        f.close();
+    }
+
+void PlotGraph(const size_t& n){
+    /* Plot the function log(r) -> log(FrobNorm(B - Br)).
+    B = (exp[-(j-k)^2 / n^2].
+    */
+
+    // The X_axis and Y_axis for plotting.
+    vector<double> X(MAX_R);
+    vector<double> Y(MAX_R);
+
+    // Constructing B.
+    DenseMatrix B(n, n);
+    for (size_t i = 0; i < n; i++){
+        for (size_t j = 0; j < n; j++){
+            double t = -std::pow((double)i-j, 2) / std::pow(n, 2);
+            double v = std::exp(t);
+            B(i, j) = v;
+        }
+    }
+
+    // Constructing Br.
+    for (int r = 1; r <= MAX_R; r++){
+        cout << "r = " << r << endl;
+        FredholmMatrix Br = CrossApproximation(B, r);
+
+        // Computing the norm of B-Br.
+        DenseMatrix Diff(n, n);
+        for (size_t i = 0; i < n; i++){
+            for (size_t j = 0; j < n; j++){
+                Diff(i, j) = B(i, j) - Br(i, j);
+            }
+        }
+        X[r-1] = r;
+        Y[r-1] = FrobeniusNorm(Diff);
+    }
+
+    Write("Graph1.txt", X, Y);
+
+}
 
 #endif
 
